@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2f7d5b">
+  <meta name="color-scheme" content="light dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="習慣">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>習慣メモ</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <div id="banner" class="banner" role="alert" hidden></div>
+
+  <main class="page">
+    <!-- 今日 -->
+    <section id="view-today" class="view" aria-labelledby="today-title">
+      <h1 id="today-title" class="date-title"></h1>
+      <p id="today-notice" class="notice" role="status" hidden></p>
+      <div id="today-record"></div>
+    </section>
+
+    <!-- カレンダー -->
+    <section id="view-calendar" class="view" aria-labelledby="cal-title" hidden>
+      <div class="cal-header">
+        <button id="cal-prev" class="btn icon-btn" type="button" aria-label="前月">‹</button>
+        <h1 id="cal-title" class="cal-title" aria-live="polite"></h1>
+        <button id="cal-next" class="btn icon-btn" type="button" aria-label="翌月">›</button>
+        <button id="cal-this" class="btn" type="button">今月</button>
+      </div>
+      <div id="cal-filters" class="chips" role="group" aria-label="表示する習慣"></div>
+      <div id="cal-grid"></div>
+      <p id="cal-legend" class="legend"></p>
+
+      <section id="day-edit" class="day-edit" aria-labelledby="day-edit-title" hidden>
+        <div class="day-edit-head">
+          <h2 id="day-edit-title" class="day-edit-title" tabindex="-1"></h2>
+          <button id="day-edit-close" class="btn" type="button">閉じる</button>
+        </div>
+        <div id="day-record"></div>
+      </section>
+    </section>
+
+    <!-- 設定 -->
+    <section id="view-settings" class="view" aria-labelledby="settings-title" hidden>
+      <h1 id="settings-title" class="page-title">設定</h1>
+
+      <section class="card" aria-labelledby="backup-title">
+        <h2 id="backup-title" class="card-title">バックアップ</h2>
+        <p>記録はこの利用環境内に保存されます。機種変更やブラウザデータ削除に備えて、定期的に書き出してください。</p>
+
+        <div class="stack">
+          <button id="export-btn" class="btn primary" type="button">バックアップを書き出す</button>
+          <button id="export-download-btn" class="btn" type="button" hidden>ダウンロードで書き出す</button>
+          <p id="export-msg" class="msg" role="status"></p>
+        </div>
+
+        <div class="stack">
+          <button id="import-btn" class="btn" type="button">バックアップを読み込む</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
+          <p id="import-msg" class="msg" role="status"></p>
+        </div>
+
+        <div id="import-confirm" class="confirm" hidden>
+          <h3 class="confirm-title">読み込む内容</h3>
+          <dl class="summary">
+            <dt>記録日数</dt><dd id="ic-days"></dd>
+            <dt>最古日</dt><dd id="ic-oldest"></dd>
+            <dt>最新日</dt><dd id="ic-newest"></dd>
+            <dt>書き出し時刻</dt><dd id="ic-exported"></dd>
+          </dl>
+          <p class="warn">現在の記録をすべて置き換えます。</p>
+          <div class="btn-row">
+            <button id="import-apply" class="btn danger" type="button">現在の記録を置き換える</button>
+            <button id="import-cancel" class="btn" type="button">取消</button>
+          </div>
+        </div>
+
+        <div id="revert-area" class="stack" hidden>
+          <button id="revert-btn" class="btn" type="button">読み込み前に戻す</button>
+          <p id="revert-note" class="hint"></p>
+          <div id="revert-confirm" class="confirm" hidden>
+            <p class="warn">前回の読み込み前の記録に戻します。現在の記録は置き換わります。</p>
+            <div class="btn-row">
+              <button id="revert-apply" class="btn danger" type="button">戻す</button>
+              <button id="revert-cancel" class="btn" type="button">取消</button>
+            </div>
+          </div>
+          <p id="revert-msg" class="msg" role="status"></p>
+        </div>
+
+        <div id="raw-export-area" class="stack" hidden>
+          <p>保存データを読み込めません。復旧の前に、保存データをそのまま退避できます（復元用のバックアップとは別のファイルです）。</p>
+          <button id="raw-export-btn" class="btn" type="button">保存データをそのまま書き出す</button>
+          <p id="raw-export-msg" class="msg" role="status"></p>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="guide-title">
+        <h2 id="guide-title" class="card-title">使い方</h2>
+        <ul class="guide">
+          <li>ホーム画面に追加してから、毎日の記録を始めてください。</li>
+          <li>Safariとホーム画面版の記録は別々に保存されます。移行するときは、Safariで書き出し、ホーム画面版で読み込みます。</li>
+          <li>同じアプリを複数のタブで同時に編集しないでください。</li>
+          <li>今日の画面の「昨夜24時までに寝た」は前日の記録になります。</li>
+          <li>過去の記録はカレンダーの日付をタップして直せます。</li>
+        </ul>
+        <p id="offline-status" class="hint"></p>
+      </section>
+    </section>
+  </main>
+
+  <nav class="tabbar" aria-label="画面の切り替え">
+    <button type="button" data-tab="today"><span aria-hidden="true">✓</span>今日</button>
+    <button type="button" data-tab="calendar"><span aria-hidden="true">▦</span>カレンダー</button>
+    <button type="button" data-tab="settings"><span aria-hidden="true">⚙</span>設定</button>
+  </nav>
+</body>
+</html>

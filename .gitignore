@@ -1,0 +1,6 @@
+# 実データ・バックアップは公開しない
+habits-backup-*.json
+habits-raw-*.txt
+*.backup.json
+node_modules/
+.DS_Store

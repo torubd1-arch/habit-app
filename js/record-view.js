@@ -1,10 +1,17 @@
 // 今日画面と日別編集で共通の入力コンポーネント。
 // DOM は1回だけ生成し、クリックは container への委譲で1つだけ登録する。
 
-import { BASIC_HABITS, SLEEP_ID, WATER_ID, WATER_SLOT_COUNT, WATER_UNIT_ML } from './habits.js';
+import {
+  PREVIOUS_DAY_HABITS,
+  SAME_DAY_HABITS,
+  WATER_ID,
+  WATER_SLOT_COUNT,
+  WATER_UNIT_ML,
+} from './habits.js';
 import { waterCount } from './model.js';
 
 const MAX_WATER_ML = WATER_SLOT_COUNT * WATER_UNIT_ML;
+let viewCount = 0;
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -33,14 +40,15 @@ function habitButton(field, icon, label) {
 }
 
 /**
- * mode: 'today'（睡眠は昨夜＝前日）| 'day'（すべて選択日）
+ * mode: 'today'（禁酒・睡眠は前日）| 'day'（すべて選択日）
  * onToggle(field, slot) を呼ぶ。保存先の決定は呼び出し側で行う。
  */
 export function createRecordView(mode, onToggle) {
+  const uid = `rv${++viewCount}`;
   const root = el('div', 'record-view');
 
   const list = el('div', 'habit-list');
-  for (const h of BASIC_HABITS) list.appendChild(habitButton(h.id, h.icon, h.label));
+  for (const h of SAME_DAY_HABITS) list.appendChild(habitButton(h.id, h.icon, h.label));
 
   // 水
   const water = el('section', 'water-box');
@@ -64,16 +72,20 @@ export function createRecordView(mode, onToggle) {
   }
   water.append(waterHead, slots, el('p', 'hint', `1回${WATER_UNIT_ML}ml`));
 
-  // 睡眠
-  const sleep = el('section', 'sleep-box');
-  const sleepBtn = habitButton(
-    SLEEP_ID,
-    '🌙',
-    mode === 'today' ? '昨夜24時までに寝た' : 'この日の夜、24時までに寝た',
-  );
-  const sleepTarget = el('span', 'habit-sub');
-  sleepBtn.querySelector('.habit-text').appendChild(sleepTarget);
-  sleep.appendChild(sleepBtn);
+  // 前日分（禁酒・睡眠）。今日画面では前日、日別編集では選択日を指す
+  const prev = el('section', 'prev-box');
+  const prevHead = el('div', 'prev-head');
+  const prevTitle = el('h3', 'section-title', mode === 'today' ? '昨日の分' : 'この日の分');
+  const prevTarget = el('p', 'prev-target');
+  prevTarget.id = `${uid}-prev-target`;
+  prevHead.append(prevTitle, prevTarget);
+  const prevList = el('div', 'habit-list');
+  for (const h of PREVIOUS_DAY_HABITS) {
+    const b = habitButton(h.id, h.icon, mode === 'today' ? h.todayLabel : h.dayLabel);
+    b.setAttribute('aria-describedby', prevTarget.id);
+    prevList.appendChild(b);
+  }
+  prev.append(prevHead, prevList);
 
   // 保存失敗のインラインエラー
   const error = el('div', 'inline-error');
@@ -84,7 +96,7 @@ export function createRecordView(mode, onToggle) {
   retry.type = 'button';
   error.append(errorText, retry);
 
-  root.append(error, list, water, sleep);
+  root.append(error, list, water, prev);
 
   let retryAction = null;
   retry.addEventListener('click', () => {
@@ -109,18 +121,21 @@ export function createRecordView(mode, onToggle) {
   return {
     el: root,
     /**
-     * record: 通常6項目・水の対象日のレコード
-     * sleepRecord: 睡眠の対象日のレコード
+     * record: 当日の項目・水の対象日のレコード
+     * prevRecord: 禁酒・睡眠の対象日のレコード
+     * prevLabel: 禁酒・睡眠の記録先（例：10/4（日））
      */
-    update({ record, sleepRecord, sleepLabel, disabled }) {
-      for (const h of BASIC_HABITS) {
+    update({ record, prevRecord, prevLabel, disabled }) {
+      for (const h of SAME_DAY_HABITS) {
         setPressed(list.querySelector(`[data-field="${h.id}"]`), record[h.id] === true);
       }
       slots.querySelectorAll('button').forEach((b, i) => setPressed(b, record[WATER_ID][i] === true));
       const ml = waterCount(record) * WATER_UNIT_ML;
       waterAmount.textContent = `${formatMl(ml)} / ${formatMl(MAX_WATER_ML)} ml`;
-      setPressed(sleepBtn, sleepRecord[SLEEP_ID] === true);
-      sleepTarget.textContent = `記録先：${sleepLabel}`;
+      for (const h of PREVIOUS_DAY_HABITS) {
+        setPressed(prevList.querySelector(`[data-field="${h.id}"]`), prevRecord[h.id] === true);
+      }
+      prevTarget.textContent = `記録先：${prevLabel}`;
       for (const b of root.querySelectorAll('button[data-field]')) {
         b.setAttribute('aria-disabled', String(Boolean(disabled)));
       }

@@ -2,8 +2,8 @@
 
 import {
   BOOLEAN_FIELDS,
+  PREVIOUS_DAY_FIELDS,
   RECORD_FIELDS,
-  SLEEP_ID,
   WATER_ID,
   WATER_SLOT_COUNT,
   WATER_UNIT_ML,
@@ -61,10 +61,10 @@ export function isEmptyRecord(record) {
 
 /**
  * 操作の保存先日付を決める。
- * 今日画面の睡眠だけは前日、日別編集ではすべて選択日。
+ * 今日画面の禁酒・睡眠は前日、日別編集ではすべて選択日。
  */
 export function resolveTargetDate(mode, field, dateKey) {
-  if (mode === 'today' && field === SLEEP_ID) return getSleepTargetDate(dateKey);
+  if (mode === 'today' && PREVIOUS_DAY_FIELDS.includes(field)) return getSleepTargetDate(dateKey);
   return dateKey;
 }
 

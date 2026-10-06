@@ -152,15 +152,22 @@ button {
   color: var(--accent-text);
 }
 
-.water-box, .sleep-box {
+.water-box, .prev-box {
   padding: 10px 12px 12px;
   border-radius: 14px;
   background: var(--surface);
   border: 1px solid var(--line);
 }
-.sleep-box { padding: 8px; }
-.sleep-box .habit-row { border-color: transparent; }
-.sleep-box .habit-row.is-on { border-color: var(--on-line); }
+.prev-box { display: grid; gap: 8px; padding: 10px 8px 8px; }
+.prev-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0 4px;
+}
+.prev-target { margin: 0; font-size: 0.9375rem; font-weight: 600; color: var(--muted); }
 
 .water-head {
   display: flex;

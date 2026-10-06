@@ -100,11 +100,12 @@ function renderBanner() {
 
 function renderToday() {
   $('today-title').textContent = formatJaLong(state.todayKey);
-  const sleepKey = getSleepTargetDate(state.todayKey);
+  // 禁酒・睡眠は前日分
+  const prevKey = getSleepTargetDate(state.todayKey);
   todayView.update({
     record: getRecord(state.data, state.todayKey),
-    sleepRecord: getRecord(state.data, sleepKey),
-    sleepLabel: formatJaShort(sleepKey),
+    prevRecord: getRecord(state.data, prevKey),
+    prevLabel: formatJaShort(prevKey),
     disabled: !inputsEnabled(),
   });
 }
@@ -140,8 +141,8 @@ function renderDayEdit() {
   const rec = getRecord(state.data, key);
   dayView.update({
     record: rec,
-    sleepRecord: rec,
-    sleepLabel: formatJaShort(key),
+    prevRecord: rec,
+    prevLabel: formatJaShort(key),
     disabled: !inputsEnabled() || key > state.todayKey,
   });
 }

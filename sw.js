@@ -2,7 +2,7 @@
 // リリースごとに CACHE_NAME の末尾を更新する。
 
 const CACHE_PREFIX = 'personal-habits-shell-';
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const CACHE_NAME = `${CACHE_PREFIX}v2`;
 
 const ASSETS = [
   './',

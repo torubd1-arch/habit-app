@@ -15,6 +15,20 @@ export const WATER_ID = 'waterSlots';
 export const WATER_SLOT_COUNT = 4;
 export const WATER_UNIT_ML = 500;
 
+/**
+ * 翌日に振り返って記録する項目（表示順）。
+ * 今日画面では前日へ保存し、日別編集では選択日へ保存する。
+ */
+export const PREVIOUS_DAY_HABITS = Object.freeze([
+  { id: 'alcoholFree', icon: '🍵', todayLabel: '昨日お酒を飲まなかった', dayLabel: 'この日、お酒を飲まなかった' },
+  { id: SLEEP_ID, icon: '🌙', todayLabel: '昨夜24時までに寝た', dayLabel: 'この日の夜、24時までに寝た' },
+]);
+
+export const PREVIOUS_DAY_FIELDS = Object.freeze(PREVIOUS_DAY_HABITS.map((h) => h.id));
+
+/** 今日画面で当日に記録する通常項目 */
+export const SAME_DAY_HABITS = Object.freeze(BASIC_HABITS.filter((h) => !PREVIOUS_DAY_FIELDS.includes(h.id)));
+
 /** 達成数（✓n/7）の対象となる boolean 7項目 */
 export const BOOLEAN_FIELDS = Object.freeze([...BASIC_HABITS.map((h) => h.id), SLEEP_ID]);
 

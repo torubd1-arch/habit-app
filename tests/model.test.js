@@ -11,7 +11,7 @@ import {
   waterCount,
   waterMl,
 } from '../js/model.js';
-import { BOOLEAN_FIELDS, RECORD_FIELDS } from '../js/habits.js';
+import { BOOLEAN_FIELDS, PREVIOUS_DAY_FIELDS, RECORD_FIELDS, SAME_DAY_HABITS } from '../js/habits.js';
 
 const NOW = '2026-10-05T00:00:00.000Z';
 
@@ -88,6 +88,34 @@ test('睡眠：今日画面からは前日、日別編集では指定日。同�
   // 10/4 の日別編集で取消 → 今日画面の昨夜欄も取消
   d = toggleField(d, resolveTargetDate('day', 'sleepByMidnight', '2026-10-04'), 'sleepByMidnight');
   assert.equal(getRecord(d, '2026-10-04').sleepByMidnight, false);
+});
+
+test('禁酒：今日画面からは前日、日別編集では指定日。同じ対象日に同じ値', () => {
+  assert.equal(resolveTargetDate('today', 'alcoholFree', '2026-10-06'), '2026-10-05');
+  assert.equal(resolveTargetDate('today', 'alcoholFree', '2026-01-01'), '2025-12-31');
+  assert.equal(resolveTargetDate('today', 'alcoholFree', '2028-03-01'), '2028-02-29');
+  assert.equal(resolveTargetDate('day', 'alcoholFree', '2026-10-05'), '2026-10-05');
+  assert.equal(resolveTargetDate('day', 'alcoholFree', '2026-10-06'), '2026-10-06');
+  // 当日に記録する項目は今日画面でも当日
+  for (const f of ['stretch', 'putting', 'appDevelopment', 'strength', 'bike']) {
+    assert.equal(resolveTargetDate('today', f, '2026-10-06'), '2026-10-06');
+  }
+
+  // 10/6 の今日画面で押す → 10/5 の日別編集に同じ値が出る
+  let d = createEmptyData(NOW);
+  d = toggleField(d, resolveTargetDate('today', 'alcoholFree', '2026-10-06'), 'alcoholFree');
+  assert.equal(getRecord(d, '2026-10-05').alcoholFree, true);
+  assert.equal(getRecord(d, '2026-10-06').alcoholFree, false);
+  // 10/5 の日別編集で取消 → 今日画面の昨日欄も取消
+  d = toggleField(d, resolveTargetDate('day', 'alcoholFree', '2026-10-05'), 'alcoholFree');
+  assert.equal(getRecord(d, '2026-10-05').alcoholFree, false);
+});
+
+test('前日に記録する項目は禁酒と睡眠、当日の項目は5つ', () => {
+  assert.deepEqual([...PREVIOUS_DAY_FIELDS], ['alcoholFree', 'sleepByMidnight']);
+  assert.deepEqual(SAME_DAY_HABITS.map((h) => h.id), ['stretch', 'putting', 'appDevelopment', 'strength', 'bike']);
+  // 保存データの項目（8項目）は変わらない
+  assert.deepEqual([...RECORD_FIELDS], ['stretch', 'putting', 'alcoholFree', 'appDevelopment', 'strength', 'bike', 'sleepByMidnight', 'waterSlots']);
 });
 
 test('達成数は水以外の7項目（睡眠を含む）', () => {

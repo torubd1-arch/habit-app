@@ -1,14 +1,21 @@
 // 習慣の定義。ラベル・順序・アイコンはデータに保存せず、ここで管理する。
 
-/** 今日画面に並ぶ通常の6項目（表示順） */
+/** 今日画面に並ぶ通常の7項目（表示順） */
 export const BASIC_HABITS = Object.freeze([
   { id: 'stretch', label: 'ストレッチ', short: 'ストレッチ', icon: '🧘' },
   { id: 'putting', label: 'パター練習', short: 'パター', icon: '⛳' },
   { id: 'alcoholFree', label: '禁酒', short: '禁酒', icon: '🍵' },
-  { id: 'appDevelopment', label: 'アプリ開発', short: 'アプリ開発', icon: '💻' },
+  { id: 'appDevelopment', label: 'アプリ開発/読書', short: 'アプリ開発/読書', icon: '💻' },
   { id: 'strength', label: '筋トレ', short: '筋トレ', icon: '💪' },
   { id: 'bike', label: 'エアロバイク', short: 'エアロバイク', icon: '🚴' },
+  { id: 'shikiho', label: '四季報', short: '四季報', icon: '📖' },
 ]);
+
+/**
+ * Ver.1 公開後に追加した項目。
+ * 追加前の保存データ・バックアップには存在しないため、欠けていれば false として読む。
+ */
+export const LATER_ADDED_FIELDS = Object.freeze(['shikiho']);
 
 export const SLEEP_ID = 'sleepByMidnight';
 export const WATER_ID = 'waterSlots';
@@ -29,7 +36,7 @@ export const PREVIOUS_DAY_FIELDS = Object.freeze(PREVIOUS_DAY_HABITS.map((h) => 
 /** 今日画面で当日に記録する通常項目 */
 export const SAME_DAY_HABITS = Object.freeze(BASIC_HABITS.filter((h) => !PREVIOUS_DAY_FIELDS.includes(h.id)));
 
-/** 達成数（✓n/7）の対象となる boolean 7項目 */
+/** 達成数（✓n/8）の対象となる boolean 8項目 */
 export const BOOLEAN_FIELDS = Object.freeze([...BASIC_HABITS.map((h) => h.id), SLEEP_ID]);
 
 /** 1日分のレコードが持つキー（これ以外は受け付けない） */
@@ -41,9 +48,10 @@ export const FILTERS = Object.freeze([
   { id: 'stretch', label: 'ストレッチ' },
   { id: 'putting', label: 'パター' },
   { id: 'alcoholFree', label: '禁酒' },
-  { id: 'appDevelopment', label: 'アプリ開発' },
+  { id: 'appDevelopment', label: 'アプリ開発/読書' },
   { id: WATER_ID, label: '水' },
   { id: 'strength', label: '筋トレ' },
   { id: 'bike', label: 'エアロバイク' },
+  { id: 'shikiho', label: '四季報' },
   { id: SLEEP_ID, label: '24時までに寝た' },
 ]);

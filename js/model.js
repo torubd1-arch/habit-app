@@ -2,6 +2,7 @@
 
 import {
   BOOLEAN_FIELDS,
+  LATER_ADDED_FIELDS,
   PREVIOUS_DAY_FIELDS,
   RECORD_FIELDS,
   WATER_ID,
@@ -49,7 +50,7 @@ export function waterMl(record) {
   return waterCount(record) * WATER_UNIT_ML;
 }
 
-/** 水以外の boolean 7項目の達成数 */
+/** 水以外の boolean 8項目の達成数 */
 export function achievedCount(record) {
   return BOOLEAN_FIELDS.filter((f) => record[f] === true).length;
 }
@@ -96,11 +97,24 @@ function hasExactKeys(obj, keys) {
   return own.length === keys.length && keys.every((k) => Object.hasOwn(obj, k));
 }
 
+/**
+ * 1日分のレコードのキーを確認する。
+ * 不明なキーは拒否し、後から追加した項目だけは欠けていてもよい。
+ */
+function hasRecordKeys(rec) {
+  return Object.keys(rec).every((k) => RECORD_FIELDS.includes(k))
+    && RECORD_FIELDS.every((k) => Object.hasOwn(rec, k) || LATER_ADDED_FIELDS.includes(k));
+}
+
 /** 1日分のレコードを検証し、既知フィールドだけで新しいオブジェクトを作る */
 function validateRecord(rec) {
-  if (!isPlainObject(rec) || !hasExactKeys(rec, RECORD_FIELDS)) return null;
+  if (!isPlainObject(rec) || !hasRecordKeys(rec)) return null;
   const out = {};
   for (const f of BOOLEAN_FIELDS) {
+    if (!Object.hasOwn(rec, f)) {
+      out[f] = false; // 追加前のデータ
+      continue;
+    }
     if (typeof rec[f] !== 'boolean') return null;
     out[f] = rec[f];
   }

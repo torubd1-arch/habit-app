@@ -25,7 +25,7 @@ test('うるう年の2月と月移動', () => {
   assert.deepEqual(shiftMonth(2026, 1, -1), { year: 2025, month: 12 });
 });
 
-test('全体表示：達成数（睡眠を含む7項目）と水を別に数える', () => {
+test('全体表示：達成数（睡眠を含む8項目）と水を別に数える', () => {
   let d = createEmptyData(NOW);
   assert.deepEqual(cellSummary(d, '2026-10-04', 'all'), { kind: 'all', empty: true, achieved: 0, water: 0, level: 0 });
   d = toggleField(d, '2026-10-04', 'sleepByMidnight');
@@ -47,6 +47,8 @@ test('全 false の保存レコードは未記録と同じ表示', () => {
   assert.equal(cellSummary(d, '2026-10-04', 'all').empty, true);
 });
 
-test('濃淡は 0〜7 を段階にまとめる', () => {
-  assert.deepEqual([0, 1, 2, 3, 4, 5, 6, 7].map(overallLevel), [0, 1, 1, 2, 2, 3, 3, 4]);
+test('濃淡は 0〜8 を段階にまとめ、全達成のみ最濃', () => {
+  assert.deepEqual([0, 1, 2, 3, 4, 5, 6, 7, 8].map((n) => overallLevel(n)), [0, 1, 1, 2, 2, 2, 3, 3, 4]);
+  // 7項目のときの段階は従来どおり
+  assert.deepEqual([0, 1, 2, 3, 4, 5, 6, 7].map((n) => overallLevel(n, 7)), [0, 1, 1, 2, 2, 3, 3, 4]);
 });

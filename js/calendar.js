@@ -29,13 +29,11 @@ export function shiftMonth(year, month, delta) {
   return { year: Math.floor(idx / 12), month: (idx % 12) + 1 };
 }
 
-/** 全体表示の濃淡段階（0〜4）。達成数 0〜7 を4段階にまとめる */
-export function overallLevel(count) {
+/** 全体表示の濃淡段階（0〜4）。0 は 0、全達成は 4、その間を 1〜3 にまとめる */
+export function overallLevel(count, total = BOOLEAN_FIELDS.length) {
   if (count <= 0) return 0;
-  if (count <= 2) return 1;
-  if (count <= 4) return 2;
-  if (count <= 6) return 3;
-  return 4;
+  if (count >= total) return 4;
+  return Math.ceil((count / total) * 3);
 }
 
 /** セルに表示する内容（純粋関数） */

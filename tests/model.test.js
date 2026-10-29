@@ -15,9 +15,9 @@ import { BOOLEAN_FIELDS, PREVIOUS_DAY_FIELDS, RECORD_FIELDS, SAME_DAY_HABITS } f
 
 const NOW = '2026-10-05T00:00:00.000Z';
 
-test('8項目：通常6＋水＋睡眠', () => {
-  assert.equal(BOOLEAN_FIELDS.length, 7);
-  assert.equal(RECORD_FIELDS.length, 8);
+test('9項目：通常7＋水＋睡眠', () => {
+  assert.equal(BOOLEAN_FIELDS.length, 8);
+  assert.equal(RECORD_FIELDS.length, 9);
   assert.ok(RECORD_FIELDS.includes('waterSlots'));
   assert.ok(RECORD_FIELDS.includes('sleepByMidnight'));
 });
@@ -97,7 +97,7 @@ test('禁酒：今日画面からは前日、日別編集では指定日。同�
   assert.equal(resolveTargetDate('day', 'alcoholFree', '2026-10-05'), '2026-10-05');
   assert.equal(resolveTargetDate('day', 'alcoholFree', '2026-10-06'), '2026-10-06');
   // 当日に記録する項目は今日画面でも当日
-  for (const f of ['stretch', 'putting', 'appDevelopment', 'strength', 'bike']) {
+  for (const f of ['stretch', 'putting', 'appDevelopment', 'strength', 'bike', 'shikiho']) {
     assert.equal(resolveTargetDate('today', f, '2026-10-06'), '2026-10-06');
   }
 
@@ -111,19 +111,23 @@ test('禁酒：今日画面からは前日、日別編集では指定日。同�
   assert.equal(getRecord(d, '2026-10-05').alcoholFree, false);
 });
 
-test('前日に記録する項目は禁酒と睡眠、当日の項目は5つ', () => {
+test('前日に記録する項目は禁酒と睡眠、当日の項目は6つ', () => {
   assert.deepEqual([...PREVIOUS_DAY_FIELDS], ['alcoholFree', 'sleepByMidnight']);
-  assert.deepEqual(SAME_DAY_HABITS.map((h) => h.id), ['stretch', 'putting', 'appDevelopment', 'strength', 'bike']);
-  // 保存データの項目（8項目）は変わらない
-  assert.deepEqual([...RECORD_FIELDS], ['stretch', 'putting', 'alcoholFree', 'appDevelopment', 'strength', 'bike', 'sleepByMidnight', 'waterSlots']);
+  assert.deepEqual(SAME_DAY_HABITS.map((h) => h.id), ['stretch', 'putting', 'appDevelopment', 'strength', 'bike', 'shikiho']);
+  assert.deepEqual([...RECORD_FIELDS], ['stretch', 'putting', 'alcoholFree', 'appDevelopment', 'strength', 'bike', 'shikiho', 'sleepByMidnight', 'waterSlots']);
 });
 
-test('達成数は水以外の7項目（睡眠を含む）', () => {
+test('アプリ開発/読書は表示名だけ変更し、保存キーは appDevelopment のまま', () => {
+  const h = SAME_DAY_HABITS.find((x) => x.id === 'appDevelopment');
+  assert.equal(h.label, 'アプリ開発/読書');
+});
+
+test('達成数は水以外の8項目（睡眠・四季報を含む）', () => {
   let d = createEmptyData(NOW);
-  for (const f of ['stretch', 'bike', 'sleepByMidnight']) d = toggleField(d, '2026-10-04', f);
+  for (const f of ['stretch', 'bike', 'shikiho', 'sleepByMidnight']) d = toggleField(d, '2026-10-04', f);
   d = toggleField(d, '2026-10-04', 'waterSlots', 2);
   const rec = getRecord(d, '2026-10-04');
-  assert.equal(achievedCount(rec), 3);
+  assert.equal(achievedCount(rec), 4);
   assert.equal(waterCount(rec), 1);
   assert.equal(isEmptyRecord(rec), false);
 });
@@ -146,8 +150,19 @@ test('validateData：既知フィールドから再構築し、不正を拒否',
   assert.equal(bad((v) => { v.revision = 1.5; }), false);
   assert.equal(bad((v) => { v.records['2026-10-05'].stretch = 1; }), false);
   assert.equal(bad((v) => { delete v.records['2026-10-05'].bike; }), false);
+  assert.equal(bad((v) => { v.records['2026-10-05'].shikiho = 'yes'; }), false);
+  assert.equal(bad((v) => { v.records['2026-10-05'].unknown = true; }), false);
   assert.equal(bad((v) => { v.records['2026-10-05'].waterSlots = [true]; }), false);
   assert.equal(bad((v) => { v.records['2026-02-30'] = v.records['2026-10-05']; }), false);
   assert.equal(bad((v) => { v.records = []; }), false);
   assert.equal(validateData(JSON.parse('{"__proto__":{"x":1}}')).ok, false);
+});
+
+test('validateData：四季報追加前のデータは shikiho=false として読める', () => {
+  const v = JSON.parse(JSON.stringify(toggleField(createEmptyData(NOW), '2026-10-05', 'putting')));
+  delete v.records['2026-10-05'].shikiho;
+  const res = validateData(v);
+  assert.equal(res.ok, true);
+  assert.equal(res.data.records['2026-10-05'].shikiho, false);
+  assert.equal(res.data.records['2026-10-05'].putting, true);
 });
